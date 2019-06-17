@@ -14,11 +14,13 @@ def test_get_training_dataset():
                                  './data/target.txt',
                                  './data/vocab.txt',
                                  './data/vocab.txt',
-                                 2,
-                                 bucket_width=5,
-                                 share_vocab=False,
-                                 maximum_features_length=50,
-                                 maximum_labels_length=20)
+                                 batch_size=20,
+                                 batch_type="tokens",
+                                 bucket_width=1,
+                                 intercept=True,
+                                 share_vocab=True,
+                                 maximum_features_length=5,
+                                 maximum_labels_length=2)
 
   iterator = dataset.make_initializable_iterator()
   source, target = iterator.get_next()
@@ -27,9 +29,12 @@ def test_get_training_dataset():
   with tf.Session() as sess:
     sess.run(tf.tables_initializer())
     sess.run(iterator.initializer)
-    s, t = sess.run([source, target])
-    print s["tokens"]
-    print t["tokens"]
+    try:
+      s, t = sess.run([source, target])
+      print s["length"]
+      print t["length"]
+    except tf.errors.OutOfRangeError:
+      print "end of the dataset"
 
 if __name__ == "__main__":
   # test_build_vocab()

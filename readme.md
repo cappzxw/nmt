@@ -22,6 +22,13 @@ data.py 使用 tf.data 的 dataset 相关 api 接口， `TextLineDataset` 从文
 * map 方法对dataset 中的元素 map 一个func，apply 方法应用一个返回   dataset 的 func；
 * `tensorflow.contrib.framework.nest.map_structure` 方法可以获取 dataset 的 shape 用于 pad；
 * pad 方法可以使用简单的 `padded_batch` 方法；也可以使用带有 bucket 功能的 `tf.contrib.data.group_by_window` 方法，使长度相近的句子进入同一个桶（pad减少），主要的方法有 `_key_func` 获取 bucket id，`window_size` 指定 batch_size， `_reduce_func` 按照 window_size 大小和桶情况划分 batch
+* 添加了 batch_type 选择，一般的按照 examples 取固定的 batch，比如32个句子；按照 tokens 取 batch 则是一个batch中按照字符数来取句子，其实就是batch_size 整除句子长度得到新的batch_size，较多在可以矩阵并行操作时使用（transformer），bucket_width=1，这个batch中所有句子长度相等，所以不需要pad了
+
+```python
+def _window_size_func(key):
+  size = batch_size // (key * bucket_width)
+  return tf.cast(size, tf.int64)
+```
 
 
 ### Ref:
